@@ -1,0 +1,11 @@
+[Desktop Entry]
+Encoding=UTF-8
+Version=1.0
+Type=Application
+Exec=gksu "xterm -T Update\ Software -e update;read;exit;"
+Name=Update Software
+Comment=Upgrades the package repos to latest, then updates the system.
+Categories=XFCE;GTK;Settings;DesktopSettings;X-XFCE-SettingsDialog;X-XFCE-SystemSettings;
+OnlyShowIn=XFCE;
+GenericName=Update Software
+Icon=package-upgrade

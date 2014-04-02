@@ -1,0 +1,10 @@
+Package: hackbox-update
+Version: 0.7
+Section: admin
+Maintainer: Carl J Smith <feedback@hacker-haven.com>
+Installed-Size: 44
+Priority: optional
+Architecture: all
+Depends: python (>=2.7)
+Description: Updates the system.
+ Automaticly preforms system updates for the user. Handles config files and conflicts. Also will fix some problems with packages. Runs at boot and once daily.
