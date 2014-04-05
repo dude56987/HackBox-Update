@@ -6,4 +6,4 @@ Hackbox-Update
 
 ####Unstable Package
 Ubuntu/Linux Mint Package<br>
-https://github.com/dude56987/Hackbox-Update/blob/master/update_UNSTABLE.deb
+https://github.com/dude56987/Hackbox-Update/blob/master/update_UNSTABLE.deb?raw=true
