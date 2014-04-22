@@ -19,6 +19,7 @@
 from os import system
 from os.path import exists
 from os import geteuid
+import sys
 #check for root since shortcuts need to be installed for all users
 if geteuid() != 0:
 	print 'ERROR: this command must be ran as root!'
@@ -37,8 +38,12 @@ else:
 	system(installCommand+' install --fix-missing')
 	# the -o options in the below commands make them automaticly update config files
 	# changed in the updates if they have not been edited by hand
-	system(installCommand+' -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" upgrade --assume-yes')
-	system(installCommand+' -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade --assume-yes')
+	if '--new-conf' in sys.argv: # set user to replace config files with package version
+		system(installCommand+' -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" upgrade --assume-yes')
+		system(installCommand+' -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" dist-upgrade --assume-yes')
+	elif '--old-conf' in sys.argv: # use the current conf files so nothing will change
+		system(installCommand+' -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" upgrade --assume-yes')
+		system(installCommand+' -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade --assume-yes')
 	print ("Removing unused packages...")
 	system(installCommand+' autoremove --assume-yes')
 	print ("Clearing downloaded files...")
