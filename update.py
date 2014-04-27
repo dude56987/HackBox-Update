@@ -49,5 +49,5 @@ else:
 	print ("Clearing downloaded files...")
 	system(installCommand+' clean --assume-yes')
 	print ("Update Complete!")
-	if exists('/usr/bin/restart-required'):
-		system('restart-required')
+	if exists('/usr/bin/reboot-required'):
+		system('reboot-required')
