@@ -3,11 +3,8 @@ show:
 	
 run:
 	python update.py
-install:
-	sudo apt-get install transmission-gtk --assume-yes
-	sudo cp update.py /usr/bin/update
-	sudo chmod +x /usr/bin/update
-	sudo link /usr/bin/update /etc/cron.daily/update
+install: build
+	sudo gdebi --no update_UNSTABLE.deb
 uninstall:
 	sudo rm /usr/bin/update
 	sudo rm /etc/cron.daily/update
