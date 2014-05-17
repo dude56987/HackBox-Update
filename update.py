@@ -26,7 +26,37 @@ if geteuid() != 0:
 	print 'It will install updates for the entire system!'
 	exit()
 else:
-	# figure out if apt-fast or apt get is present use apt-fast if possible
+	if '--help' in sys.argv or '-h' in sys.argv:
+		helpOutput ='#######################################################################\n'
+ 		helpOutput +='Updates and upgrades the system automaticly.\n'
+ 		helpOutput +='Copyright (C) 2014  Carl J Smith\n'
+		helpOutput +='\n'
+ 		helpOutput +='This program is free software: you can redistribute it and/or modify\n'
+ 		helpOutput +='it under the terms of the GNU General Public License as published by\n'
+ 		helpOutput +='the Free Software Foundation, either version 3 of the License, or\n'
+ 		helpOutput +='(at your option) any later version.\n'
+
+ 		helpOutput +='This program is distributed in the hope that it will be useful,\n'
+ 		helpOutput +='but WITHOUT ANY WARRANTY; without even the implied warranty of\n'
+ 		helpOutput +='MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n'
+ 		helpOutput +='GNU General Public License for more details.\n'
+		helpOutput +='\n'
+ 		helpOutput +='You should have received a copy of the GNU General Public License\n'
+ 		helpOutput +='along with this program.  If not, see <http://www.gnu.org/licenses/>.\n'
+ 		helpOutput +='#######################################################################\n'
+		helpOutput +='--help or -h\n'
+		helpOutput +='    Shows this help menu.\n'
+		helpOutput +='--new-conf\n'
+		helpOutput +='    Installs the package maintainers version of\n'
+		helpOutput +='    any config files that have been updated.\n'
+		helpOutput +='--reboot\n'
+		helpOutput +='    Reboots the computer after update.\n'
+ 		helpOutput +='#######################################################################\n'
+		print helpOutput
+		# this just prints the help and quits the program when
+		# the --help or -h argument is given to the program
+		exit()
+	## figure out if apt-fast or apt get is present use apt-fast if possible
 	if exists('/usr/bin/apt-get'):
 		installCommand = 'apt-get'
 	if exists('/usr/bin/apt-fast'):
@@ -41,7 +71,7 @@ else:
 	if '--new-conf' in sys.argv: # set user to replace config files with package version
 		system(installCommand+' -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" upgrade --assume-yes')
 		system(installCommand+' -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" dist-upgrade --assume-yes')
-	elif '--old-conf' in sys.argv: # use the current conf files so nothing will change
+	else: # use the current conf files so nothing will change
 		system(installCommand+' -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" upgrade --assume-yes')
 		system(installCommand+' -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade --assume-yes')
 	print ("Removing unused packages...")
@@ -51,3 +81,5 @@ else:
 	print ("Update Complete!")
 	if exists('/usr/bin/reboot-required'):
 		system('reboot-required')
+	if '--reboot' in sys.argv:
+		system('reboot')
