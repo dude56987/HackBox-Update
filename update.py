@@ -26,7 +26,20 @@ if geteuid() != 0:
 	print 'It will install updates for the entire system!'
 	exit()
 else:
-	if '--help' in sys.argv or '-h' in sys.argv:
+	if '--reboot-on' in sys.argv:
+		# the zz makes it run last
+		system('cp -v /usr/share/hackbox-update/update-reboot /etc/cron.daily/zz-update-reboot')
+		exit()
+	elif '--reboot-off' in sys.argv:
+		system('rm -v /etc/cron.daily/zz-update-reboot')
+		exit()
+	elif '--log' in sys.argv:
+		system('less /var/log/autoUpdateLog')
+		exit()
+	elif '--clean-log' in sys.argv:
+		system('rm -v /var/log/autoUpdateLog')
+		exit()
+	elif '--help' in sys.argv or '-h' in sys.argv:
 		helpOutput ='#######################################################################\n'
  		helpOutput +='Updates and upgrades the system automaticly.\n'
  		helpOutput +='Copyright (C) 2014  Carl J Smith\n'
@@ -51,6 +64,19 @@ else:
 		helpOutput +='    any config files that have been updated.\n'
 		helpOutput +='--reboot\n'
 		helpOutput +='    Reboots the computer after update.\n'
+		helpOutput +='--reboot-on\n'
+		helpOutput +='    Activates server style update then\n'
+		helpOutput +='     reboot procedures. System will wait\n'
+		helpOutput +='     till no users are logged in and usage\n'
+		helpOutput +='     is low. The system will then update \n'
+		helpOutput +='     and reboot.\n'
+		helpOutput +='--reboot-off\n'
+		helpOutput +='    Reverses the changes made by the reboot\n'
+		helpOutput +='     on command.\n'
+		helpOutput +='--log\n'
+		helpOutput +='    Displays logs of the system updates.\n'
+		helpOutput +='--clean-log\n'
+		helpOutput +='    Remove old logs.\n'
  		helpOutput +='#######################################################################\n'
 		print helpOutput
 		# this just prints the help and quits the program when

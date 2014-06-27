@@ -17,9 +17,11 @@ build-deb:
 	mkdir -p debian/usr;
 	mkdir -p debian/usr/bin;
 	mkdir -p debian/usr/share;
+	mkdir -p debian/usr/share/hackbox-update;
 	mkdir -p debian/usr/share/applications;
-	# copy over the binary
+	# copy over the files 
 	cp -vf update.py ./debian/usr/bin/update
+	cp -vf update-reboot.sh ./debian/usr/share/hackbox-update/update-reboot
 	cp -vf update.desktop ./debian/usr/share/applications/update.desktop 
 	# make the program executable
 	chmod +x ./debian/usr/bin/update
