@@ -38,6 +38,7 @@ else:
 		exit()
 	elif '--clean-log' in sys.argv:
 		system('rm -v /var/log/autoUpdateLog')
+		system('rm -v /var/log/autoUpdateLog.old')
 		exit()
 	elif '--help' in sys.argv or '-h' in sys.argv:
 		helpOutput ='#######################################################################\n'
@@ -73,6 +74,8 @@ else:
 		helpOutput +='--reboot-off\n'
 		helpOutput +='    Reverses the changes made by the reboot\n'
 		helpOutput +='     on command.\n'
+		helpOutput +='--no-log\n'
+		helpOutput +='    Do not log the system updates.\n'
 		helpOutput +='--view-log\n'
 		helpOutput +='    Displays logs of the system updates.\n'
 		helpOutput +='--clean-log\n'
@@ -96,22 +99,32 @@ else:
 	if ('--no-log' in sys.argv) != True:
 		logCommand = " >> /var/log/autoUpdateLog"
 		# add date header at begining of log
-		system('echo '+('#'*80)+logCommand)
+		system('echo "'+('#'*80)+'"'+logCommand)
 		system('echo "Update started on $(date)"'+logCommand)
-		system('echo '+('#'*80)+logCommand)
-		# show the log as it is filled
-		system('tail -f /var/log/autoUpdateLog &')
+		system('echo "'+('#'*80)+'"'+logCommand)
+		# print log stuff above to screen	
+		print ('#'*80)
+		system('echo "Update started on $(date)"')
+		print ('#'*80)
+	else:
+		# log command is nothing if --no-log is set on
+		logCommand = ''
 	# note that the dist-upgrade option is included to update the kernel automatically
+	print 'Updating the repos...'
 	system(installCommand+' update --assume-yes'+logCommand)
 	# the commands below fix broken packages, if broken, otherwise it does nothing
+	print 'Searching for and fixing broken packages...'
 	system(installCommand+' -f install'+logCommand)
 	system(installCommand+' install --fix-missing'+logCommand)
 	# the -o options in the below commands make them automaticly update config files
 	# changed in the updates if they have not been edited by hand
+	print 'Installing new packages...'
 	if '--new-conf' in sys.argv: # set user to replace config files with package version
+		print 'Using the package maintainers version of config files...'
 		system(installCommand+' -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" upgrade --assume-yes'+logCommand)
 		system(installCommand+' -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" dist-upgrade --assume-yes'+logCommand)
 	else: # use the current conf files so nothing will change
+		print 'Keeping your current config files...'
 		system(installCommand+' -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" upgrade --assume-yes'+logCommand)
 		system(installCommand+' -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade --assume-yes'+logCommand)
 	print ("Removing unused packages...")
@@ -119,8 +132,6 @@ else:
 	print ("Clearing downloaded files...")
 	system(installCommand+' clean --assume-yes'+logCommand)
 	print ("Update Complete!")
-	# kill tail to stop showing progress
-	system('killall tail')
 	if exists('/usr/bin/reboot-required'):
 		system('reboot-required')
 	if '--reboot' in sys.argv:
