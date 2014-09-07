@@ -1,7 +1,7 @@
 # add updates to rc.local to launch at boot
 cp -f /etc/rc.local /etc/rc.local.backup;
 sed -i.bak 's/exit 0//g' /etc/rc.local;
-echo 'update &' >> /etc/rc.local;
+echo 'update --auto-clean-log &' >> /etc/rc.local;
 echo 'exit 0' >> /etc/rc.local;
 # remove blank lines
 sed -i.bak '/^$/d' /etc/rc.local;

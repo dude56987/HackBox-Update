@@ -33,7 +33,7 @@ else:
 	elif '--reboot-off' in sys.argv:
 		system('rm -v /etc/cron.daily/zz-update-reboot')
 		exit()
-	elif '--log' in sys.argv:
+	elif '--view-log' in sys.argv:
 		system('less /var/log/autoUpdateLog')
 		exit()
 	elif '--clean-log' in sys.argv:
@@ -73,38 +73,54 @@ else:
 		helpOutput +='--reboot-off\n'
 		helpOutput +='    Reverses the changes made by the reboot\n'
 		helpOutput +='     on command.\n'
-		helpOutput +='--log\n'
+		helpOutput +='--view-log\n'
 		helpOutput +='    Displays logs of the system updates.\n'
 		helpOutput +='--clean-log\n'
 		helpOutput +='    Remove old logs.\n'
+		helpOutput +='--auto-clean-log\n'
+		helpOutput +='    Auto remove logs over 10000 lines long.\n'
  		helpOutput +='#######################################################################\n'
 		print helpOutput
 		# this just prints the help and quits the program when
 		# the --help or -h argument is given to the program
 		exit()
+	if '--auto-clean-log' in sys.argv:
+		# clean logs with more than 10000 lines, copy the big file to a .old file and then create a new log
+		system('lines=$(cat /var/log/autoUpdateLog | grep -c "\n");if [ $lines -gt 10000 ]; then rm /var/log/autoUpdateLog.old;cp /var/log/autoUpdateLog /var/log/autoUpdateLog.old;rm /var/log/autoUpdateLog;fi')
 	## figure out if apt-fast or apt get is present use apt-fast if possible
 	if exists('/usr/bin/apt-get'):
 		installCommand = 'apt-get'
 	if exists('/usr/bin/apt-fast'):
 		installCommand = 'apt-fast'
+	# check if logfile is to be made
+	if ('--no-log' in sys.argv) != True:
+		logCommand = " >> /var/log/autoUpdateLog"
+		# add date header at begining of log
+		system('echo '+('#'*80)+logCommand)
+		system('echo "Update started on $(date)"'+logCommand)
+		system('echo '+('#'*80)+logCommand)
+		# show the log as it is filled
+		system('tail -f /var/log/autoUpdateLog &')
 	# note that the dist-upgrade option is included to update the kernel automatically
-	system(installCommand+' update --assume-yes')
+	system(installCommand+' update --assume-yes'+logCommand)
 	# the commands below fix broken packages, if broken, otherwise it does nothing
-	system(installCommand+' -f install')
-	system(installCommand+' install --fix-missing')
+	system(installCommand+' -f install'+logCommand)
+	system(installCommand+' install --fix-missing'+logCommand)
 	# the -o options in the below commands make them automaticly update config files
 	# changed in the updates if they have not been edited by hand
 	if '--new-conf' in sys.argv: # set user to replace config files with package version
-		system(installCommand+' -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" upgrade --assume-yes')
-		system(installCommand+' -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" dist-upgrade --assume-yes')
+		system(installCommand+' -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" upgrade --assume-yes'+logCommand)
+		system(installCommand+' -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" dist-upgrade --assume-yes'+logCommand)
 	else: # use the current conf files so nothing will change
-		system(installCommand+' -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" upgrade --assume-yes')
-		system(installCommand+' -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade --assume-yes')
+		system(installCommand+' -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" upgrade --assume-yes'+logCommand)
+		system(installCommand+' -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade --assume-yes'+logCommand)
 	print ("Removing unused packages...")
-	system(installCommand+' autoremove --assume-yes')
+	system(installCommand+' autoremove --assume-yes'+logCommand)
 	print ("Clearing downloaded files...")
-	system(installCommand+' clean --assume-yes')
+	system(installCommand+' clean --assume-yes'+logCommand)
 	print ("Update Complete!")
+	# kill tail to stop showing progress
+	system('killall tail')
 	if exists('/usr/bin/reboot-required'):
 		system('reboot-required')
 	if '--reboot' in sys.argv:

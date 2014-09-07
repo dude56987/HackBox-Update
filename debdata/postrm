@@ -1,6 +1,6 @@
 # remove launch at boot in rc.local
-sed -i.backup 's/update \&//g' /etc/rc.local;
+sed -i 's/update --auto-clean-log \&//g' /etc/rc.local;
 # remove blank lines
-sed -i.bak '/^$/d' /etc/rc.local;
+sed -i '/^$/d' /etc/rc.local;
 # remove cron daily updates
 rm -vf /etc/cron.daily/update;
