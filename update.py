@@ -28,7 +28,7 @@ if geteuid() != 0:
 else:
 	if '--reboot-on' in sys.argv:
 		# the zz makes it run last
-		system('cp -v /usr/share/hackbox-update/update-reboot /etc/cron.daily/zz-update-reboot')
+		system('link /usr/share/hackbox-update/update-reboot /etc/cron.daily/zz-update-reboot')
 		exit()
 	elif '--reboot-off' in sys.argv:
 		system('rm -v /etc/cron.daily/zz-update-reboot')

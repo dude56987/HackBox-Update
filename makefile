@@ -25,6 +25,7 @@ build-deb:
 	cp -vf update.desktop ./debian/usr/share/applications/update.desktop 
 	# make the program executable
 	chmod +x ./debian/usr/bin/update
+	chmod +x ./debian/usr/share/hackbox-update/update-reboot
 	# Create the md5sums file
 	find ./debian/ -type f -print0 | xargs -0 md5sum > ./debian/DEBIAN/md5sums
 	# cut filenames of extra junk
