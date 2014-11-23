@@ -27,11 +27,19 @@ if geteuid() != 0:
 	exit()
 else:
 	if '--reboot-on' in sys.argv:
-		# the zz makes it run last
+		# create link to the update reboot script and make it execute, the zz makes it run last
 		system('link /usr/share/hackbox-update/update-reboot /etc/cron.daily/zz-update-reboot')
+		system('chmod +x /etc/cron.daily/zz-update-reboot')
+		# Unlink the regular update command
+		# This keeps the package from giving uninstall errors since the cron link is made in the install process
+		system('link /dev/null /etc/cron.daily/update')
 		exit()
 	elif '--reboot-off' in sys.argv:
+		# remove update reboot link
 		system('rm -v /etc/cron.daily/zz-update-reboot')
+		# relink the regular update command
+		system('link /usr/bin/update /etc/cron.daily/update')
+		system('chmod +x /etc/cron.daily/update')
 		exit()
 	elif '--view-log' in sys.argv:
 		system('less /var/log/autoUpdateLog')
@@ -88,7 +96,7 @@ else:
 		# the --help or -h argument is given to the program
 		exit()
 	if '--auto-clean-log' in sys.argv:
-		# clean logs with more than 10000 lines, copy the big file to a .old file and then create a new log
+		# clean logs with more than 10000 lines, copy the big file to a .old file and then create a new log, this needs rewrote in python
 		system('lines=$(cat /var/log/autoUpdateLog | grep -c "\n");if [ $lines -gt 10000 ]; then rm /var/log/autoUpdateLog.old;cp /var/log/autoUpdateLog /var/log/autoUpdateLog.old;rm /var/log/autoUpdateLog;fi')
 	## figure out if apt-fast or apt get is present use apt-fast if possible
 	if exists('/usr/bin/apt-get'):
