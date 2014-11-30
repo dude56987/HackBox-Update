@@ -32,12 +32,14 @@ else:
 		system('chmod +x /etc/cron.daily/zz-update-reboot')
 		# Unlink the regular update command
 		# This keeps the package from giving uninstall errors since the cron link is made in the install process
-		system('link /dev/null /etc/cron.daily/update')
+		system('rm /etc/cron.daily/update')
+		system('echo "#Do Nothing" > /etc/cron.daily/update')
 		exit()
 	elif '--reboot-off' in sys.argv:
 		# remove update reboot link
 		system('rm -v /etc/cron.daily/zz-update-reboot')
 		# relink the regular update command
+		system('rm /etc/cron.daily/update')
 		system('link /usr/bin/update /etc/cron.daily/update')
 		system('chmod +x /etc/cron.daily/update')
 		exit()
