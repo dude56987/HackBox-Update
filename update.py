@@ -120,6 +120,9 @@ else:
 		# log command is nothing if --no-log is set on
 		logCommand = ''
 	# note that the dist-upgrade option is included to update the kernel automatically
+	print 'Checking for partially installed packages...'
+	# the below command will complete package installs that were interupted, otherwise it does nothing
+	system('dpkg --configure -a'+logCommand)
 	print 'Updating the repos...'
 	system(installCommand+' update --assume-yes'+logCommand)
 	# the commands below fix broken packages, if broken, otherwise it does nothing
