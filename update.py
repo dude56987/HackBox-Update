@@ -119,10 +119,17 @@ else:
 	else:
 		# log command is nothing if --no-log is set on
 		logCommand = ''
-	# note that the dist-upgrade option is included to update the kernel automatically
+	################################################################################
 	print 'Checking for partially installed packages...'
 	# the below command will complete package installs that were interupted, otherwise it does nothing
 	system('dpkg --configure -a'+logCommand)
+	# clean up the repo lists to keep from getting errors on comments
+	print('Cleaning up the repo lists...')
+	# remove all the comments from repo lists
+	system('sed -i "s/^#.*$//g" /etc/apt/sources.list.d/*.list'+logCommand)
+	# remove empty lines from repo lists
+	system('sed -i "/^$/d" /etc/apt/sources.list.d/*.list'+logCommand)
+	################################################################################
 	print 'Updating the repos...'
 	system(installCommand+' update --assume-yes'+logCommand)
 	# the commands below fix broken packages, if broken, otherwise it does nothing
@@ -135,10 +142,12 @@ else:
 	if '--new-conf' in sys.argv: # set user to replace config files with package version
 		print 'Using the package maintainers version of config files...'
 		system(installCommand+' -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" upgrade --assume-yes'+logCommand)
+		# the dist-upgrade option is included to update the kernel
 		system(installCommand+' -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" dist-upgrade --assume-yes'+logCommand)
 	else: # use the current conf files so nothing will change
 		print 'Keeping your current config files...'
 		system(installCommand+' -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" upgrade --assume-yes'+logCommand)
+		# the dist-upgrade option is included to update the kernel 
 		system(installCommand+' -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade --assume-yes'+logCommand)
 	print ("Removing unused packages...")
 	system(installCommand+' autoremove --assume-yes'+logCommand)
