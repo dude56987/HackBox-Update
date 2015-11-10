@@ -6,7 +6,7 @@ while true;do
 	# compare user home directories to the output from the users command
 	for dir in /home/*; do
 		user=$(echo $dir | sed "s/\/home\///g")
-		if users | grep -c -q $user; then
+		if who | grep -c -q $user; then
 			# if someone is logged in print thier name
 			echo "$user is still logged in."
 			# also set the flag that someone is logged in
