@@ -2,7 +2,7 @@
 Encoding=UTF-8
 Version=1.0
 Type=Application
-Exec=terminator -f -T "Update Software" -x bash -c "pkexec update --no-log;echo 'Press enter to end the program.';read;"
+Exec=update --gui
 Name=Update Software
 Comment=Upgrades the package repos to latest, then updates the system.
 Categories=XFCE;GTK;Settings;DesktopSettings;X-XFCE-SettingsDialog;X-XFCE-SystemSettings;

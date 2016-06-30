@@ -1,7 +1,7 @@
 #! /usr/bin/python
 ########################################################################
 # Updates and upgrades the system automaticly.
-# Copyright (C) 2014  Carl J Smith
+# Copyright (C) 2016  Carl J Smith
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,6 +20,20 @@ from os import system
 from os.path import exists
 from os import geteuid
 import sys
+# check for gui argument since it is a shortcut to relaunch the program graphically
+if '--gui' in sys.argv:
+	# check for graphical terminal emulators to run the program with
+	if exists('/usr/bin/terminator'):
+		# use terminator
+		system('''terminator -f -T "Update Software" -x bash -c "pkexec update --no-log;echo 'Press enter to end the program.';read;"''')
+	elif exists('/usr/bin/xterm'):
+		# use xterm
+		system('''xterm -T "Update Software" -e bash -c "pkexec update --no-log;echo 'Press enter to end the program.';read;"''')
+	else:
+		# if none exist just run the program normally
+		system('pkexec update --no-log')
+	# exit the program after gui execution
+	exit()
 #check for root since shortcuts need to be installed for all users
 if geteuid() != 0:
 	print 'ERROR: this command must be ran as root!'
