@@ -19,6 +19,9 @@ build-deb:
 	mkdir -p debian/usr/share;
 	mkdir -p debian/usr/share/hackbox-update;
 	mkdir -p debian/usr/share/applications;
+	mkdir -p debian/etc/apt/apt.conf.d;
+	# copy the apt progressbar config
+	cp apt-progressbar-config debian/etc/apt/apt.conf.d/9999-hackbox-apt-progressbar
 	# copy over the files 
 	cp -vf update.py ./debian/usr/bin/update
 	cp -vf update-reboot.sh ./debian/usr/share/hackbox-update/update-reboot
