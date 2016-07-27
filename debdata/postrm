@@ -2,5 +2,3 @@
 sed -i 's/update --auto-clean-log \&//g' /etc/rc.local;
 # remove blank lines
 sed -i '/^$/d' /etc/rc.local;
-# remove cron daily updates
-rm -vf /etc/cron.daily/update;

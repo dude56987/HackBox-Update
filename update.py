@@ -25,13 +25,13 @@ if '--gui' in sys.argv:
 	# check for graphical terminal emulators to run the program with
 	if exists('/usr/bin/terminator'):
 		# use terminator
-		system('''terminator -f -T "Update Software" -x bash -c "pkexec update --no-log;echo 'Press enter to end the program.';read;"''')
+		system('''terminator -f -T "Update Software" -x bash -c "pkexec update;echo 'Press enter to end the program.';read;"''')
 	elif exists('/usr/bin/xterm'):
 		# use xterm
-		system('''xterm -T "Update Software" -e bash -c "pkexec update --no-log;echo 'Press enter to end the program.';read;"''')
+		system('''xterm -T "Update Software" -e bash -c "pkexec update;echo 'Press enter to end the program.';read;"''')
 	else:
 		# if none exist just run the program normally
-		system('pkexec update --no-log')
+		system('pkexec update')
 	# exit the program after gui execution
 	exit()
 #check for root since shortcuts need to be installed for all users
@@ -41,24 +41,19 @@ if geteuid() != 0:
 	exit()
 else:
 	if '--reboot-on' in sys.argv:
-		# create link to the update reboot script and make it execute, the zz makes it run last
-		system('link /usr/share/hackbox-update/update-reboot /etc/cron.daily/zz-update-reboot')
+		# make the reboot script executable, the zz makes it run last
 		system('chmod +x /etc/cron.daily/zz-update-reboot')
-		# Unlink the regular update command
-		# This keeps the package from giving uninstall errors since the cron link is made in the install process
-		system('rm /etc/cron.daily/update')
-		system('echo "#Do Nothing" > /etc/cron.daily/update')
+		# remove execute permissions for normal updates
+		system('chmod -x /etc/cron.daily/update')
 		exit()
 	elif '--reboot-off' in sys.argv:
-		# remove update reboot link
-		system('rm -v /etc/cron.daily/zz-update-reboot')
-		# relink the regular update command
-		system('rm /etc/cron.daily/update')
-		system('link /usr/bin/update /etc/cron.daily/update')
+		# make the default cron script executable
 		system('chmod +x /etc/cron.daily/update')
+		# remove executable permissions on reboot script
+		system('chmod -x /etc/cron.daily/zz-update-reboot')
 		exit()
 	elif '--view-log' in sys.argv:
-		system('less /var/log/autoUpdateLog')
+		system('more /var/log/autoUpdate* | less')
 		exit()
 	elif '--clean-log' in sys.argv:
 		system('rm -v /var/log/autoUpdateLog')
@@ -73,7 +68,6 @@ else:
  		helpOutput +='it under the terms of the GNU General Public License as published by\n'
  		helpOutput +='the Free Software Foundation, either version 3 of the License, or\n'
  		helpOutput +='(at your option) any later version.\n'
-
  		helpOutput +='This program is distributed in the hope that it will be useful,\n'
  		helpOutput +='but WITHOUT ANY WARRANTY; without even the implied warranty of\n'
  		helpOutput +='MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n'
@@ -98,8 +92,8 @@ else:
 		helpOutput +='--reboot-off\n'
 		helpOutput +='    Reverses the changes made by the reboot\n'
 		helpOutput +='     on command.\n'
-		helpOutput +='--no-log\n'
-		helpOutput +='    Do not log the system updates.\n'
+		helpOutput +='--log\n'
+		helpOutput +='   Log during updates.\n'
 		helpOutput +='--view-log\n'
 		helpOutput +='    Displays logs of the system updates.\n'
 		helpOutput +='--clean-log\n'
@@ -113,14 +107,31 @@ else:
 		exit()
 	if '--auto-clean-log' in sys.argv:
 		# clean logs with more than 10000 lines, copy the big file to a .old file and then create a new log, this needs rewrote in python
-		system('lines=$(cat /var/log/autoUpdateLog | grep -c "\n");if [ $lines -gt 10000 ]; then rm /var/log/autoUpdateLog.old;cp /var/log/autoUpdateLog /var/log/autoUpdateLog.old;rm /var/log/autoUpdateLog;fi')
+		readFile=open('/var/log/autoUpdateLog','r')
+		tempFile=''
+		overFlowFile=''
+		counter=0
+		# read each line of the file into tempFile
+		for line in readFile:
+			counter+=1
+			tempFile+=line
+		# if log is more than 10000 lines move it to a .old file
+		if counter > 10000:
+			# write the content of existing file to a .old file
+			overFlowFile=open('/var/log/autoUpdateLog.old','w')
+			overFlowFile.write(tempFile)
+			overFlowFile.close()
+			# blank out existing file
+			blankFile=open('/var/log/autoUpdateLog','w')
+			blankFile.write('')
+			blankFile.close()	
 	## figure out if apt-fast or apt get is present use apt-fast if possible
 	if exists('/usr/bin/apt-get'):
 		installCommand = 'apt-get'
 	if exists('/usr/bin/apt-fast'):
 		installCommand = 'apt-fast'
 	# check if logfile is to be made
-	if ('--no-log' in sys.argv) != True:
+	if ('--log' in sys.argv) or ('--auto-clean-log' in sys.argv):
 		logCommand = " >> /var/log/autoUpdateLog"
 		# add date header at begining of log
 		system('echo "'+('#'*80)+'"'+logCommand)
@@ -131,43 +142,61 @@ else:
 		system('echo "Update started on $(date)"')
 		print ('#'*80)
 	else:
-		# log command is nothing if --no-log is set on
+		# log command is nothing if --log is not set
 		logCommand = ''
-	################################################################################
+	########################################################################
+	print '#'*80
 	print 'Checking for partially installed packages...'
+	print '#'*80
 	# the below command will complete package installs that were interupted, otherwise it does nothing
 	system('dpkg --configure -a'+logCommand)
 	# clean up the repo lists to keep from getting errors on comments
+	print '#'*80
 	print('Cleaning up the repo lists...')
+	print '#'*80
 	# remove all the comments from repo lists
 	system('sed -i "s/^#.*$//g" /etc/apt/sources.list.d/*.list'+logCommand)
 	# remove empty lines from repo lists
 	system('sed -i "/^$/d" /etc/apt/sources.list.d/*.list'+logCommand)
-	################################################################################
+	########################################################################
+	print '#'*80
 	print 'Updating the repos...'
+	print '#'*80
 	system(installCommand+' update --assume-yes'+logCommand)
 	# the commands below fix broken packages, if broken, otherwise it does nothing
+	print '#'*80
 	print 'Searching for and fixing broken packages...'
+	print '#'*80
 	system(installCommand+' -f install'+logCommand)
 	system(installCommand+' install --fix-missing'+logCommand)
 	# the -o options in the below commands make them automaticly update config files
 	# changed in the updates if they have not been edited by hand
+	print '#'*80
 	print 'Installing new packages...'
+	print '#'*80
 	if '--new-conf' in sys.argv: # set user to replace config files with package version
 		print 'Using the package maintainers version of config files...'
+		print '#'*80
 		system(installCommand+' -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" upgrade --assume-yes'+logCommand)
 		# the dist-upgrade option is included to update the kernel
 		system(installCommand+' -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" dist-upgrade --assume-yes'+logCommand)
 	else: # use the current conf files so nothing will change
 		print 'Keeping your current config files...'
+		print '#'*80
 		system(installCommand+' -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" upgrade --assume-yes'+logCommand)
 		# the dist-upgrade option is included to update the kernel 
 		system(installCommand+' -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade --assume-yes'+logCommand)
+	print '#'*80
 	print ("Removing unused packages...")
+	print '#'*80
 	system(installCommand+' autoremove --assume-yes'+logCommand)
+	print '#'*80
 	print ("Clearing downloaded files...")
+	print '#'*80
 	system(installCommand+' clean --assume-yes'+logCommand)
+	print '#'*80
 	print ("Update Complete!")
+	print '#'*80
 	if exists('/usr/bin/reboot-required'):
 		system('reboot-required')
 	if '--reboot' in sys.argv:
