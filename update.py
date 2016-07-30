@@ -53,7 +53,7 @@ else:
 		system('chmod -x /etc/cron.daily/zz-update-reboot')
 		exit()
 	elif '--view-log' in sys.argv:
-		system('more /var/log/autoUpdate* | less')
+		system('cat /var/log/autoUpdateLog.old /var/log/autoUpdateLog | less')
 		exit()
 	elif '--clean-log' in sys.argv:
 		system('rm -v /var/log/autoUpdateLog')
