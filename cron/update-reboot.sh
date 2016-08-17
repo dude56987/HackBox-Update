@@ -1,4 +1,4 @@
-# /bin/bash
+#! /bin/bash
 ########################################################################
 # Update the system and reboot when no users are logged in.
 # Copyright (C) 2016  Carl J Smith

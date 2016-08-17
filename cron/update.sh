@@ -1,4 +1,4 @@
-# /bin/bash
+#! /bin/bash
 ########################################################################
 # Updates and upgrade the system using cron.
 # Copyright (C) 2016  Carl J Smith
