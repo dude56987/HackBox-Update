@@ -5,6 +5,6 @@ Maintainer: Carl J Smith <BM-NBHLt5EUFVEbRCmrbVrfCyaB2c8d24U9>
 Installed-Size: 44
 Priority: optional
 Architecture: all
-Depends: python (>=2.7), sed
+Depends: python (>=2.7), sed, anacron
 Description: Updates the system.
  Automaticly preforms system updates for the user. Handles config files and conflicts. Also will fix some problems with packages. Runs at boot and once daily.
