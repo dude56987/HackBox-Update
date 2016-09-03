@@ -107,6 +107,9 @@ else:
 		exit()
 	if '--auto-clean-log' in sys.argv:
 		# clean logs with more than 10000 lines, copy the big file to a .old file and then create a new log, this needs rewrote in python
+		if not exists('/var/log/autoUpdateLog'):
+			# write  a blank file if no file yet exists
+			open('/var/log/autoUpdateLog','w').write('')
 		readFile=open('/var/log/autoUpdateLog','r')
 		tempFile=''
 		overFlowFile=''
@@ -124,7 +127,7 @@ else:
 			# blank out existing file
 			blankFile=open('/var/log/autoUpdateLog','w')
 			blankFile.write('')
-			blankFile.close()	
+			blankFile.close()
 	## figure out if apt-fast or apt get is present use apt-fast if possible
 	if exists('/usr/bin/apt-get'):
 		installCommand = 'apt-get'
@@ -137,7 +140,7 @@ else:
 		system('echo "'+('#'*80)+'"'+logCommand)
 		system('echo "Update started on $(date)"'+logCommand)
 		system('echo "'+('#'*80)+'"'+logCommand)
-		# print log stuff above to screen	
+		# print log stuff above to screen
 		print ('#'*80)
 		system('echo "Update started on $(date)"')
 		print ('#'*80)
@@ -184,7 +187,7 @@ else:
 		print 'Keeping your current config files...'
 		print '#'*80
 		system(installCommand+' -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" upgrade --assume-yes'+logCommand)
-		# the dist-upgrade option is included to update the kernel 
+		# the dist-upgrade option is included to update the kernel
 		system(installCommand+' -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade --assume-yes'+logCommand)
 	print '#'*80
 	print ("Removing unused packages...")
