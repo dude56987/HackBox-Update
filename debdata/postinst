@@ -1,8 +1,7 @@
-# add updates to rc.local to launch at boot
-cp -f /etc/rc.local /etc/rc.local.backup;
-sed -i.bak 's/exit 0//g' /etc/rc.local;
-echo 'update --auto-clean-log &' >> /etc/rc.local;
-echo 'exit 0' >> /etc/rc.local;
-# remove blank lines
-sed -i.bak '/^$/d' /etc/rc.local;
-rm /etc/rc.local.bak
+if [ -L /etc/cron.d/zz-update-reboot ];then
+	echo 'Update reboot is active...';
+	echo 'Leaving configuration unchanged...';
+else
+	echo 'Setting up daily and boot time updates...';
+	ln -fsv /usr/share/hackbox-update/update-daily.cron /etc/cron.d/update-daily;
+fi

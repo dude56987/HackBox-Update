@@ -25,7 +25,7 @@ uninstall:
 	sudo apt-get purge hackbox-update
 installed-size:
 	du -sx --exclude DEBIAN ./debian/
-build: 
+build:
 	sudo make build-deb;
 build-deb:
 	mkdir -p debian;
@@ -36,17 +36,14 @@ build-deb:
 	mkdir -p debian/usr/share/hackbox-update;
 	mkdir -p debian/usr/share/applications;
 	mkdir -p debian/etc/apt/apt.conf.d;
-	mkdir -p debian/etc/cron.daily/;
-	# copy over the cron scripts and set the update script to executable
-	cp -vf cron/update.sh debian/etc/cron.daily/update
-	chmod +x debian/etc/cron.daily/update
-	cp -vf cron/update-reboot.sh ./debian/etc/cron.daily/zz-update-reboot
-	chmod -x ./debian/etc/cron.daily/zz-update-reboot
+	mkdir -p debian/etc/cron.d;
+	# copy over the cron scripts
+	cp -vf cron/*.cron ./debian/usr/share/hackbox-update/
 	# copy the apt progressbar config
 	cp -vf apt-progressbar-config debian/etc/apt/apt.conf.d/9999-hackbox-apt-progressbar
-	# copy over the files 
+	# copy over the update script and the launcher
 	cp -vf update.py ./debian/usr/bin/update
-	cp -vf update.desktop ./debian/usr/share/applications/update.desktop 
+	cp -vf update.desktop ./debian/usr/share/applications/update.desktop
 	# make the program executable
 	chmod +x ./debian/usr/bin/update
 	# Create the md5sums file
@@ -56,7 +53,7 @@ build-deb:
 	sed -i.bak 's/\\n*DEBIAN*\\n//g' ./debian/DEBIAN/md5sums
 	sed -i.bak 's/\\n*DEBIAN*//g' ./debian/DEBIAN/md5sums
 	rm -v ./debian/DEBIAN/md5sums.bak
-	# figure out the package size	
+	# figure out the package size
 	du -sx --exclude DEBIAN ./debian/ > Installed-Size.txt
 	# copy over package data
 	cp -rv debdata/. debian/DEBIAN/

@@ -17,9 +17,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ########################################################################
 from os import system
-from os.path import exists
 from os import geteuid
+from os import listdir
+from os import popen
+from os.path import exists
+from time import sleep
 import sys
+########################################################################
 # check for gui argument since it is a shortcut to relaunch the program graphically
 if '--gui' in sys.argv:
 	# check for graphical terminal emulators to run the program with
@@ -40,17 +44,24 @@ if geteuid() != 0:
 	print 'It will install updates for the entire system!'
 	exit()
 else:
-	if '--reboot-on' in sys.argv:
-		# make the reboot script executable, the zz makes it run last
-		system('chmod +x /etc/cron.daily/zz-update-reboot')
-		# remove execute permissions for normal updates
-		system('chmod -x /etc/cron.daily/update')
+	# check for arguments that execute without running an update
+	if '--force-reboot-on' in sys.argv:
+		# link the reboot cron job into the cron.d directory
+		system('ln -sv  /usr/share/hackbox-update/update-force-reboot.cron /etc/cron.d/zz-update-reboot')
+		# disable daily updates
+		system('rm -v /etc/cron.d/update-daily')
 		exit()
-	elif '--reboot-off' in sys.argv:
-		# make the default cron script executable
-		system('chmod +x /etc/cron.daily/update')
-		# remove executable permissions on reboot script
-		system('chmod -x /etc/cron.daily/zz-update-reboot')
+	elif '--reboot-on' in sys.argv:
+		# link the reboot cron job into the cron.d directory
+		system('ln -sv  /usr/share/hackbox-update/update-reboot.cron /etc/cron.d/zz-update-reboot')
+		# disable daily updates
+		system('rm -v /etc/cron.d/update-daily')
+		exit()
+	elif '--force-reboot-off' in sys.argv or '--reboot-off' in sys.argv:
+		# unlink the force reboot cron job
+		system('rm -v /etc/cron.d/zz-update-reboot')
+		# enable daily updates
+		system('ln -sv /usr/share/hackbox-update/update-daily.cron /etc/cron.d/update-daily')
 		exit()
 	elif '--view-log' in sys.argv:
 		system('cat /var/log/autoUpdateLog.old /var/log/autoUpdateLog | less')
@@ -62,7 +73,7 @@ else:
 	elif '--help' in sys.argv or '-h' in sys.argv:
 		helpOutput ='#######################################################################\n'
  		helpOutput +='Updates and upgrades the system automaticly.\n'
- 		helpOutput +='Copyright (C) 2014  Carl J Smith\n'
+ 		helpOutput +='Copyright (C) 2016  Carl J Smith\n'
 		helpOutput +='\n'
  		helpOutput +='This program is free software: you can redistribute it and/or modify\n'
  		helpOutput +='it under the terms of the GNU General Public License as published by\n'
@@ -85,13 +96,17 @@ else:
 		helpOutput +='    Reboots the computer after update.\n'
 		helpOutput +='--reboot-on\n'
 		helpOutput +='    Activates server style update then\n'
-		helpOutput +='     reboot procedures. System will wait\n'
-		helpOutput +='     till no users are logged in and usage\n'
-		helpOutput +='     is low. The system will then update \n'
-		helpOutput +='     and reboot.\n'
+		helpOutput +='    reboot procedures. System will wait\n'
+		helpOutput +='    till no users are logged in. Then \n'
+		helpOutput +='    the system will then update and \n'
+		helpOutput +='    reboot.\n'
+		helpOutput +='--force-reboot-on\n'
+		helpOutput +='    The same as --reboot-on but do not\n'
+		helpOutput +='    check for logged in users. Just\n'
+		helpOutput +='    instantly reboot the system.\n'
 		helpOutput +='--reboot-off\n'
 		helpOutput +='    Reverses the changes made by the reboot\n'
-		helpOutput +='     on command.\n'
+		helpOutput +='    on command.\n'
 		helpOutput +='--log\n'
 		helpOutput +='   Log during updates.\n'
 		helpOutput +='--view-log\n'
@@ -200,7 +215,36 @@ else:
 	print '#'*80
 	print ("Update Complete!")
 	print '#'*80
+	# run reboot required check after the system update, if it exists
 	if exists('/usr/bin/reboot-required'):
 		system('reboot-required')
-	if '--reboot' in sys.argv:
+	# wait until there are no active users and then reboot the system
+	if '--soft-reboot' in sys.argv:
+		# set active users to true to start the below loop
+		activeUsers = True
+		# display a message to explain what is happening
+		print('Waiting for users to logout...')
+		while activeUsers:
+			# loop until no active users are found
+			activeUsers = False
+			# get the output of the who command on linux to find active users
+			output = popen('who').read().split('\n')
+			# create users to store the usernames pulled below
+			users = list()
+			for line in output:
+				# grab the username from each line of who command output
+				users.append(line.split(' ')[0])
+			# get the home directories for all users to compare with logins
+			userPaths = listdir('/home/')
+			# check that no active users can be found on the system
+			for user in users:
+				if user in userPaths:
+					activeUsers=True
+			# if there are still active users wait 90 seconds and check again
+			if activeUsers == True:
+				sleep(90)
+		# the loop is broken and there are no active users so reboot the system
+		system('reboot')
+	elif '--reboot' in sys.argv:
+		# forcefully reboot the system without checking for active users
 		system('reboot')

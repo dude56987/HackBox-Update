@@ -1,0 +1,2 @@
+# update the system and reboot when all users have logged off
+@daily root update --auto-clean-log --soft-reboot

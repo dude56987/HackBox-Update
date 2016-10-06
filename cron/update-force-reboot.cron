@@ -1,0 +1,2 @@
+# update the system and force a reboot after the update
+@daily root update --auto-clean-log --reboot

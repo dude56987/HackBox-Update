@@ -1,4 +1,8 @@
-# remove launch at boot in rc.local
-sed -i 's/update --auto-clean-log \&//g' /etc/rc.local;
-# remove blank lines
-sed -i '/^$/d' /etc/rc.local;
+echo 'Remove broken links...';
+if [ -L /etc/cron.d/update-daily ];then
+	rm -v /etc/cron.d/update-daily;
+elif [ -L /etc/cron.d/zz-update-reboot ];then
+	rm -v /etc/cron.d/zz-update-reboot;
+else
+	echo 'No broken links found...'
+fi

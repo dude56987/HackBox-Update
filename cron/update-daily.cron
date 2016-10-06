@@ -1,0 +1,4 @@
+# update the cron job once a day
+@daily root update --auto-clean-log
+# run cron job on reboot in case the sytem is not left on constantly
+@reboot root update --auto-clean-log
