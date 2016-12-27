@@ -211,7 +211,7 @@ else:
 	print '#'*80
 	print ("Clearing downloaded files...")
 	print '#'*80
-	system(installCommand+' clean --assume-yes'+logCommand)
+	system(installCommand+' autoclean --assume-yes'+logCommand)
 	print '#'*80
 	print ("Update Complete!")
 	print '#'*80
