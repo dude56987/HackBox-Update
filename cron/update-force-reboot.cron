@@ -1,2 +1,7 @@
+# Set the shell and the path variable
+SHELL=/bin/bash
+PATH=/usr/bin:/sbin
 # update the system and force a reboot after the update
 @daily root update --auto-clean-log --reboot
+# run cron job on reboot in case the sytem is not left on constantly
+@reboot root update --auto-clean-log
