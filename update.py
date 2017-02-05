@@ -245,6 +245,7 @@ else:
 				sleep(90)
 		# the loop is broken and there are no active users so reboot the system
 		system('reboot')
-	elif '--reboot' in sys.argv:
+	if '--reboot' in sys.argv:
 		# forcefully reboot the system without checking for active users
 		system('reboot')
+		system('shutdown -r')
