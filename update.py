@@ -22,6 +22,7 @@ from os import listdir
 from os import popen
 from os.path import exists
 from time import sleep
+from time import strftime
 import sys
 ########################################################################
 # check for gui argument since it is a shortcut to relaunch the program graphically
@@ -150,14 +151,16 @@ else:
 		installCommand = 'apt-fast'
 	# check if logfile is to be made
 	if ('--log' in sys.argv) or ('--auto-clean-log' in sys.argv):
+		# generate the log time as a string
+		logTime = strftime("%c")
 		logCommand = " >> /var/log/autoUpdateLog"
 		# add date header at begining of log
 		system('echo "'+('#'*80)+'"'+logCommand)
-		system('echo "Update started on $(date)"'+logCommand)
+		system('echo "Update started on '+logTime+'"'+logCommand)
 		system('echo "'+('#'*80)+'"'+logCommand)
 		# print log stuff above to screen
 		print ('#'*80)
-		system('echo "Update started on $(date)"')
+		system('echo "Update started on '+logTime+'"')
 		print ('#'*80)
 	else:
 		# log command is nothing if --log is not set
