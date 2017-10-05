@@ -2,6 +2,6 @@
 SHELL=/bin/bash
 PATH=/usr/bin:/sbin
 # update the system and reboot when all users have logged off
-@daily root update --auto-clean-log --soft-reboot
+@daily root /usr/bin/update --auto-clean-log --soft-reboot
 # run cron job on reboot in case the sytem is not left on constantly
-@reboot root update --auto-clean-log
+@reboot root /usr/bin/update --auto-clean-log
