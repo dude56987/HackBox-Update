@@ -220,7 +220,7 @@ else:
 	print '#'*80
 	# run reboot required check after the system update, if it exists
 	if exists('/usr/bin/reboot-required'):
-		system('reboot-required')
+		system('/usr/bin/reboot-required')
 	# wait until there are no active users and then reboot the system
 	if '--soft-reboot' in sys.argv:
 		# set active users to true to start the below loop
@@ -247,8 +247,8 @@ else:
 			if activeUsers == True:
 				sleep(90)
 		# the loop is broken and there are no active users so reboot the system
-		system('reboot')
+		system('/sbin/reboot')
 	if '--reboot' in sys.argv:
 		# forcefully reboot the system without checking for active users
-		system('reboot')
-		system('shutdown -r')
+		system('/sbin/reboot')
+		system('/sbin/shutdown -r')
